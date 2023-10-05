@@ -1,5 +1,6 @@
 module TestNoAllocations
+include("allocation_macros.jl")
 
-# Write your package code here.
+
 
 end
