@@ -16,7 +16,7 @@ macro testnoallocations(expressions...)
     end
 
     # Uncomment the following line if non-const globals should be prohibited
-    _fail_if_non_const_globals_in_expressions(__module__, expressions...)
+    _fail_if_non_const_globals_in_expressions(__module__, false, expressions...)
     return esc(
         quote
             if (!@is_called_from_function())
@@ -49,19 +49,25 @@ macro is_called_from_function()
     return expr
 end
 
-function _fail_if_non_const_globals_in_expressions(mod::Module, expressions...)
+function _fail_if_non_const_globals_in_expressions(mod::Module, only_return_no_error::Bool, expressions...)
+    has_non_const = false
+
     for e in expressions
         non_const_globals = (
             arg for arg in expressionsymbols(e) if isdefined(mod, arg) && !isconst(mod, arg)
         )
         if !isempty(non_const_globals)
-            error(
-                "testnoallocations called with expression containing non const global symbols $(collect(
-            non_const_globals
-        ))",
-            )
+            if !only_return_no_error
+                error(
+                    "testnoallocations called with expression containing non const global symbols $(collect(
+                non_const_globals
+            ))")
+            end
+            has_non_const = true
         end
     end
+
+    !has_non_const
 end
 
 " Return all the symbols that make up an expression (or itself if a symbol is passed)"
