@@ -1,7 +1,7 @@
 name = "TestNoAllocations"
 uuid = "4f9cea44-66d8-4d7b-9fef-fad96b0e1517"
 authors = ["Jonas W"]
-version = "1.0.0-DEV"
+version = "0.1.0"
 
 [compat]
 julia = "1"
