@@ -1,6 +1,7 @@
 export count_allocations
+export warn_alloc
 
-function count_allocations(func::Function, precompile::Bool=true)
+function count_allocations(func::Function, precompile::Bool=false)
     # get own stacktrace to know minimum stack depth
     own_stacktrace = stacktrace()
     own_func_trace = own_stacktrace[1]
@@ -65,4 +66,17 @@ function count_allocations(func::Function, precompile::Bool=true)
     @warn warn_str
 
     return (res, total_allocated)
+end
+
+macro warn_alloc(expressions...)
+    return esc(
+        quote
+            (res, allocs) = count_allocations(() -> begin
+                    $(exprs...)
+                end, false
+            )
+
+            res
+        end
+    )
 end
