@@ -34,10 +34,10 @@ macro testnoallocations(expressions...)
             end
             # @test (@allocated $(exprs...)) === 0
             (res, allocs) = count_allocations(() -> begin
-                $(exprs...)
+                # $(exprs...)
+                @test (@allocated $(exprs...)) === 0
             end)
 
-            @test allocs === 0
             res
         end
     )

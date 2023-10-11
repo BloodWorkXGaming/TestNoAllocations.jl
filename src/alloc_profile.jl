@@ -19,7 +19,7 @@ function count_allocations(func::Function, precompile::Bool=true)
     # analyze allocs
     allocs = alloc_res.allocs
     if isempty(allocs)
-        return
+        return (res, 0)
     end
 
 
