@@ -9,9 +9,14 @@ macro testnoallocations(expressions...)
     end
 
     exprs = expressions
-    run_twice = true
+    run_twice = false
     if length(expressions) >= 2 && (expressions[1] == :onlyonce || expressions[1] == :noprecompile)
         run_twice = false
+        exprs = expressions[2:end]
+    end
+
+    if length(expressions) >= 2 && (expressions[1] == :runtwice || expressions[1] == :precompile)
+        run_twice = true
         exprs = expressions[2:end]
     end
 
