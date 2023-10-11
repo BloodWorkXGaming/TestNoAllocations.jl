@@ -1,16 +1,19 @@
 export count_allocations
 
-function count_allocations(func::Function)
+function count_allocations(func::Function, precompile::Bool=true)
     # get own stacktrace to know minimum stack depth
     own_stacktrace = stacktrace()
     own_func_trace = own_stacktrace[1]
 
     # run function once to precompile
-    func()
+    if precompile
+        # TODO: check if it is nessecary to precompile
+        func()
+    end
 
     # profile funciton for allocations
     Profile.Allocs.clear()
-    Profile.Allocs.@profile sample_rate = 1 func()
+    res = (Profile.Allocs.@profile sample_rate = 1 func())
     alloc_res = Profile.Allocs.fetch()
 
     # analyze allocs
@@ -25,22 +28,22 @@ function count_allocations(func::Function)
     warn_str = ""
     alloc_map = Dict()
 
+    # check all allocations and deduplicate
     for alloc in allocs
         stack = alloc.stacktrace
         total_allocated += alloc.size
 
+        # find only stacktrace below current function
         last_index = findlast(stack) do st
             st.file == own_func_trace.file && st.func == own_func_trace.func
         end
 
-        @show last_index
+        # Additonal Stack entries that are added due to the profiling
+        additonal_stack_depth = 3
+        tested_func = stack[last_index-additonal_stack_depth-1]
 
-
-        alloc_location = stack[last_index-3]
-        tested_func = alloc_location
-
-        alloc_stack_depth = 4
-        sub_stack = stack[max(1, last_index - alloc_stack_depth - 3):last_index-3]
+        # Test function
+        sub_stack = stack[max(1, last_index - WARN_ALLOC_STACK_DEPTH - additonal_stack_depth):last_index-additonal_stack_depth]
         sub_stack_str = ""
 
 
@@ -48,6 +51,7 @@ function count_allocations(func::Function)
             sub_stack_str *= "\n$(i == length(sub_stack) ? "└" : "├")$(repeat("─", i)) $(s.func) @ $(s.file):$(s.line)"
         end
 
+        # deduplicate
         (num_calls, amount_allocated, type) = get(alloc_map, sub_stack_str, (0, 0, nothing))
         alloc_map[sub_stack_str] = (num_calls + 1, amount_allocated + alloc.size, alloc.type)
     end
@@ -60,5 +64,5 @@ function count_allocations(func::Function)
 
     @warn warn_str
 
-    return
+    return (res, total_allocated)
 end

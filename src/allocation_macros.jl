@@ -32,7 +32,13 @@ macro testnoallocations(expressions...)
             if $run_twice
                 $(exprs...)
             end
-            @test (@allocated $(exprs...)) === 0
+            # @test (@allocated $(exprs...)) === 0
+            (res, allocs) = count_allocations(() -> begin
+                $(exprs...)
+            end)
+
+            @test allocs === 0
+            res
         end
     )
 end
