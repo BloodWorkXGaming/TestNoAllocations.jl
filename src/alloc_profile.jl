@@ -1,5 +1,5 @@
 export count_allocations
-export warn_alloc
+export @warn_alloc
 
 function count_allocations(func::Function, precompile::Bool=false)
     # get own stacktrace to know minimum stack depth
@@ -41,7 +41,7 @@ function count_allocations(func::Function, precompile::Bool=false)
 
         # Additonal Stack entries that are added due to the profiling
         additonal_stack_depth = 3
-        tested_func = stack[last_index-additonal_stack_depth-1]
+        tested_func = stack[last_index-additonal_stack_depth]
 
         # Test function
         sub_stack = stack[max(1, last_index - WARN_ALLOC_STACK_DEPTH - additonal_stack_depth):last_index-additonal_stack_depth]
@@ -72,7 +72,7 @@ macro warn_alloc(expressions...)
     return esc(
         quote
             (res, allocs) = count_allocations(() -> begin
-                    $(exprs...)
+                    $(expressions...)
                 end, false
             )
 
