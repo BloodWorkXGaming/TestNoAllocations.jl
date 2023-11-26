@@ -1,0 +1,8 @@
+name = "examples"
+uuid = "dfb08ce0-307d-472a-b70b-1681e08fa776"
+authors = ["Jonas Wilfert <jonas.wilfert@fibclick.de>"]
+version = "0.1.0"
+
+[deps]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+TestNoAllocations = "4f9cea44-66d8-4d7b-9fef-fad96b0e1517"
